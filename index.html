@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Mask: Convert image to binary map based on alpha value</title>
+        <style>
+            body{
+                font-family:Verdana, Geneva, sans-serif ;
+            }
+            #container{
+                position: absolute; 
+                margin-top: 50px;
+                text-align: center; 
+                width: 100%;
+            }
+            #imgContainer{
+                position: relative; 
+                /* border:1px solid red;  */
+            }
+            #img{
+                cursor:pointer; 
+                width: 150px;
+                /* border: 1px solid rgb(45, 45, 53); */
+            }
+            .buttonContainer{
+                position: relative;  
+            }
+            .button{
+                cursor:pointer; 
+                padding:2px 3px; 
+                margin: 5px 0 0 0; 
+                font-size: 2em;
+                font-family:Verdana, Geneva, sans-serif ;
+                border: 1px solid dimgray;
+                border-radius: 5%;
+            }
+            .button:hover{
+                font-size: 2.1em;
+                padding:0 2px; 
+            }
+            #imgFile{
+                display: none;
+            }
+            .resolution{
+                width: 50px;
+            }
+            .label{
+                display: block;
+                font-size: 1.5em;
+            }
+            #setDialog{
+                display: none;
+            }
+            fieldset{
+                border: none;
+                border-top:1px solid grey;
+            }
+            /* #canvas{
+                border:1px solid black;
+            } */
+        </style>
+    </head>
+    <body>   
+            <div id="container">
+                <p style="text-align: left;">MASK: This program uses canvas imageData to Generate a binary representation of an image, based on the alpha property.</p>
+                <p style="text-align: left;">Check out the full documentation and other practical examples on <a href="#">Github</a></p>
+                <div style="margin: auto;">
+                    <br>
+                    <hr>
+                    <br>
+                    <div id="imgContainer">
+                        <label>
+                            <img src=""  alt="Image" id="img">
+                            <input type="file" accept="image/*" id="imgFile">
+                        <p class="buttonContainer"><span class="button" > Choose Img</span></p> 
+                        </label>
+                        
+                    </div>
+                    <div>
+                        <fieldset>
+                            <legend> Set the desired resolution</legend>
+                                <label class="label">
+                                    Use Original resolution.
+                                    <input type="radio" id="Original" name="res" checked>
+                                    <span id="imgProp" style="font-size: medium;"></span>
+                                </label>
+                                <label class="label">
+                                    Set preferred resolution.
+                                    <input type="radio" id="setRes" name="res">
+                                </label>
+                                <div id="setDialog">
+                                    <label class="label">
+                                        Width:
+                                        <input type="number" class="resolution" id="setWidth" value="32" disabled>
+                                    </label>
+                                    <label class="label">
+                                        Height:
+                                        <input type="number" class="resolution" id="setHeight" value="32" disabled>
+                                    </label>
+                                </div>
+                           
+                        </fieldset>  
+                    </div>   
+                    <p class="buttonContainer"><span class="button" id="gen">Generate</span></p>
+                </div>
+                <p style="margin-top: 50px; color: grey;">JS-Boss 2022</p>
+            </div>
+    
+            <canvas id="canvas">
+                Your browser does not support the HTML 5 Canvas.
+            </canvas>
+
+        <script type="text/javascript">
+            window.addEventListener('load', eventWindowLoaded, false);
+                function eventWindowLoaded() {
+                    lunch();
+            }
+            function lunch(){
+                let canvas = document.getElementById("canvas");
+                let context = canvas.getContext('2d');
+
+                let img = document.getElementById("img");
+                let imgFile = document.getElementById("imgFile");
+                let setRes = document.getElementById("setRes");
+                let Original = document.getElementById("original");
+
+                let imgRealWidth;
+                let imgRealHeight;
+                let imgSetWidth;
+                let imgSetHeight;
+
+                //positioning
+                canvas.width = innerWidth;
+                canvas.height =innerHeight;
+                
+                window.addEventListener("click", clickHandler, false);
+                function clickHandler(e){
+                    if(e.target == document.getElementById("gen")){
+                        imgSetWidth = document.getElementById("setWidth").value;
+                        imgSetHeight = document.getElementById("setHeight").value;
+                        generate();
+                    }
+                    if (setRes.checked == true) {
+                        document.getElementById("setDialog").style.display = "block";
+                        document.getElementById("setWidth").disabled = false;
+                        document.getElementById("setHeight").disabled = false;
+                        
+                    }
+                    else{
+                        document.getElementById("setDialog").style.display = "none";
+                    }
+
+                }
+                
+                
+                let FILE;
+                imgFile.onchange = function handler(){
+                    FILE = imgFile.files[0];
+                    if(FILE){
+                        img.src = window.URL.createObjectURL(FILE);
+                        img.width = 100;
+                        img.onload = function(){
+                            document.getElementById("imgProp").innerHTML = `width: ${img.naturalWidth}, height: ${img.naturalHeight}`
+                            imgRealWidth = img.naturalWidth || img.width;
+                            imgRealHeight = img.naturalHeight || img.height;   
+                        }
+                    }
+                }
+
+                let imageData;
+                let mask;
+                function generate(){
+                    if(FILE){
+                        mask = [];
+                        let imgWidth = (setRes.checked == true) ? imgSetWidth : imgRealWidth;
+                        let imgHeight = (setRes.checked == true) ? imgSetHeight : imgRealHeight;
+
+                        context.drawImage(img,0,0,imgWidth,imgHeight);
+                        imageData = context.getImageData(0,0,imgWidth,imgHeight);
+                        context.clearRect(0,0,canvas.width,canvas.height);
+                        // document.getElementById("container").style.display = "none";
+
+                        for ( let i = 0; i < imgWidth; i++ ) {
+                            mask[i] = [];
+                            for ( let j = 0; j < imgHeight; j++ ) {
+                                let currentPixel = (j + (i * imgWidth) )*4 + 3 ;
+                                if ( imageData.data [currentPixel] !== 0 ){
+                                    mask[i][j] = 1;
+                                } 
+                                else{
+                                    mask[i][j] = 0;
+                                } 
+                            }
+                        }
+                        //console.log(mask);
+                        saveFile();
+                    }  
+                }
+
+                function saveFile(){
+                    let map = JSON.stringify(mask);
+                    for (let i = 0; i < map.length; i++) {
+                        if(map[i] == "["  && map[i-1] == ","){
+                            map = map.slice(0,i) + "\n" + map.slice(i);
+                        }  
+                    }
+
+                    let a = document.createElement("a");
+                    a.href = URL.createObjectURL(new Blob([map],{type: "text/plain"}))
+                    a.setAttribute("download", "Mask.txt");
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(a.href);
+                    URL.revokeObjectURL(img.src);
+                }
+            }
+        </script>
+    </body>
+</html>
