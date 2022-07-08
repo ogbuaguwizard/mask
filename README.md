@@ -1,8 +1,8 @@
 # Mask:
 **Generates a binary representation of an image based on the alpha property**
 
-![VanillaJS](http://) ![Html5](http://) ![version](https://img.shields.io/badge/dynamic/json?color=blue&label=release%20&prefix=%20v%20&query=version&suffix=%20&url=https%3A%2F%2Fraw.githubusercontent.com%2FWizard-Js%2Fmask%2Fmain%2Fpackage.json)
-
+![VanillaJS](https://img.shields.io/badge/Vanilla%20-JS-yellowgreen) ![Html5](http://) ![version](https://img.shields.io/badge/dynamic/json?color=blue&label=release%20&prefix=%20v%20&query=version&suffix=%20&url=https%3A%2F%2Fraw.githubusercontent.com%2FWizard-Js%2Fmask%2Fmain%2Fpackage.json)
+![License](https://img.shields.io/badge/dynamic/json?color=yellowgreen&label=License&prefix=%20&query=license&suffix=%20&url=https%3A%2F%2Fraw.githubusercontent.com%2FWizard-Js%2Fmask%2Fmain%2Fpackage.json)
 
 ## About
 
