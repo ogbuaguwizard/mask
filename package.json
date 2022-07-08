@@ -1,0 +1,25 @@
+{
+  "name": "mask",
+  "version": "0.1",
+  "description": "A simple JoyStick that use HTML5 Canvas and Vanilla JavaScript, for touch and mouse interfaces",
+  "main": "joy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bobboteck/JoyStick.git"
+  },
+  "keywords": [
+    "mask",
+    "vanilla",
+    "pixel perfect collision detection",
+    "html5"
+  ],
+  "author": "Ogbuagu Francis(@OgbuaguWizard)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wizard-js/mask/issues"
+  },
+  "homepage": "https://github.com/wizard-js/mask#readme"
+}
