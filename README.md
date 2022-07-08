@@ -1,7 +1,7 @@
 # Mask:
 **Generates a binary representation of an image based on the alpha property**
 
-![VanillaJS](http://) ![Html5](http://) 
+![VanillaJS](http://) ![Html5](http://) ![version](http://)
 
 
 ## About
