@@ -1,14 +1,14 @@
 {
   "name": "mask",
   "version": "0.1",
-  "description": "A simple JoyStick that use HTML5 Canvas and Vanilla JavaScript, for touch and mouse interfaces",
-  "main": "joy.js",
+  "description": "A simple program that Generates a binary representation of an image based on the alpha property ",
+  "main": "mask.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bobboteck/JoyStick.git"
+    "url": "git+https://github.com/wizard-js/mask.git"
   },
   "keywords": [
     "mask",
