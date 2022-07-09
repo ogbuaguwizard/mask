@@ -27,7 +27,7 @@ You can copy the content of this file and use in your project, or any other way 
 ![Image vs Result](http://repolinktoimage)
 
 **Practical Example**
-Convert an image with some transparent area yourself, click *[here](http://)*. Zoom out on the generated text to clearly see the 1s form the chosen image.
+Convert an image with some transparent area yourself, click *[here](http://ogbuaguwizard.github.io/projects/mask)*. Zoom out on the generated text to clearly see the 1s form the chosen image.
 
 Check out *[this project](http://projectlink)* where a generated value was used to test for collision between two object.
 
