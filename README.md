@@ -24,7 +24,8 @@ You can copy the content of this file and use in your project, or any other way 
 ## Example
 
 **Image vs Result**
-![Image vs Result](https://drive.google.com/uc?export=view&id=12jR-wPyCDTmkmXiDksrjTnmyzio5MC2N)
+![Image vs Result](https://drive.google.com/uc?export=view&id=12rY3h0JKhiKkHStH-Uf4XCAsFXvUa8Z9)
+![Image vs Result](https://drive.google.com/uc?export=view&id=12qXQvUCD7fl5c_nvsylaEqwJiSyr3EaU)
 
 **Practical Example**
 Convert an image with some transparent area yourself, click *[here](http://ogbuaguwizard.github.io/projects/mask)*. Zoom out on the generated text to clearly see the 1s form the chosen image.
