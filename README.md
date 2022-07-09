@@ -6,7 +6,7 @@
 
 ## About
 
-**Autor : [Wizard-JS](http://JS-Boss.github.io)**
+**Autor : [Ogbuagu Francis](http://ogbuaguwizard.github.io)**
 
 This program uses canvas imageData to Generate a binary representation of an image, based on the alpha property.
 It was originally developed to test for pixel perfect collision between objects in html5 canvas game against the use of canvas' imageData method in the game programe. But there are probably other problems out there this program might inspire a solution to.
