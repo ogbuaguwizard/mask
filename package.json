@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wizard-js/mask.git"
+    "url": "git+https://github.com/ogbuaguwizard/mask.git"
   },
   "keywords": [
     "mask",
@@ -16,10 +16,10 @@
     "pixel perfect collision detection",
     "html5"
   ],
-  "author": "Ogbuagu Francis(@OgbuaguWizard)",
+  "author": "Ogbuagu Francis(@ogbuaguwizard)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wizard-js/mask/issues"
+    "url": "https://github.com/ogbuaguwizard/mask/issues"
   },
-  "homepage": "https://github.com/wizard-js/mask#readme"
+  "homepage": "https://github.com/ogbuaguwizard/mask#readme"
 }
