@@ -33,7 +33,7 @@ You can copy the content of this file and use in your project, or any other way 
 
 Convert an image with some transparent area yourself, click *[here](http://ogbuaguwizard.github.io/projects/mask)*. Zoom out on the generated text to clearly see the 1s form the chosen image.
 
-Check out *[this project](http://projectlink)* where a generated value was used to test for collision between two object.
+Check out *[this project](https://ogbuaguwizard.github.io/projects/NELCA%20Html5%20Game%20Courses/008%20Collision%20Detection/004%20Pixel%20Perfect%20Collision/)* where a generated value was used to test for collision between two object.
 
 ## Share your thought/experience
 
