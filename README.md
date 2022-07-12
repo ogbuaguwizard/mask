@@ -26,7 +26,7 @@ Choose image resolution by checking the radio button or use the original resolut
 Click **Generate** button and the result will be downloaded as a .txt file.
 You can copy the content of this file and use in your project, or any other way you've discovered to use this file.
 
-> **Note:** Incase of collision detection in Html5 canvas, the chosen resolution has to match the width and height of object drawn on the canvas, not neccesarily the original resolution. Except if you've figured out hoe to do otherwise.
+> **Note:** Incase of collision detection in Html5 canvas, the chosen resolution has to match the width and height of object drawn on the canvas, not neccesarily the original resolution.
 
 ## Example
 
