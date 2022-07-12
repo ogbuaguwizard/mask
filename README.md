@@ -4,6 +4,13 @@
 ![VanillaJS](https://img.shields.io/badge/Vanilla%20-JS-yellowgreen) ![version](https://img.shields.io/badge/dynamic/json?color=blue&label=release%20&prefix=%20v%20&query=version&suffix=%20&url=https%3A%2F%2Fraw.githubusercontent.com%2FWizard-Js%2Fmask%2Fmain%2Fpackage.json)
 ![License](https://img.shields.io/badge/dynamic/json?color=yellowgreen&label=License&prefix=%20&query=license&suffix=%20&url=https%3A%2F%2Fraw.githubusercontent.com%2FWizard-Js%2Fmask%2Fmain%2Fpackage.json)
 
+## Update
+
+**Release Date:** 07/12/2022
+
+***Features***
+ * Enabled Selection of multiple images
+
 ## About
 
 **Autor : [Ogbuagu Francis](http://ogbuaguwizard.github.io)**
@@ -31,13 +38,13 @@ You can copy the content of this file and use in your project, or any other way 
 
 **Practical Example**
 
-Convert an image with some transparent area yourself, click *[here](http://ogbuaguwizard.github.io/projects/mask)*. Zoom out on the generated text to clearly see the 1s form the chosen image.
+Convert an image with some transparent area yourself, click *[here](https://ogbuaguwizard.github.io/projects/mask)*. Zoom out on the generated text to clearly see the 1s form the chosen image.
 
-Check out *[this project](https://ogbuaguwizard.github.io/projects/NELCA%20Html5%20Game%20Courses/008%20Collision%20Detection/004%20Pixel%20Perfect%20Collision/)* where a generated value was used to test for collision between two object.
+Check out *[this project](https://ogbuaguwizard.github.io/projects/NELCA%20Html5%20Game%20Courses/008%20Collision%20Detection/004%20Pixel%20Perfect%20Collision/)* where a generated mask was used to test for collision between two object.
 
 ## Share your thought/experience
 
-You can send me an *[email](http://)* , or use any of the below platforms where i have writen about this project. ![Blogspot](http://) ![Medium](http://) ![Tumblr](http://) 
+You can send me an *[email](mailto:ogbuagu.wizard@gmail.com?subject=[GitHub]%20Mask%20Experience)* , or reach out to me on *[twitter](https://twitter.com/OgbuaguWizard)* 
 
 ## Appreciation
 
@@ -45,7 +52,7 @@ Thanks for checking out the project, if you like the project please give it a st
 
 ### Support the project
 
-[AirTM](https://) 
-[paypal](https://) 
-[Email](http://)
+[paypal](https://www.paypal.me/ogbuagufrancis) 
 
+
+[Email](mailto:ogbuagu.wizard@gmail.com?subject=[GitHub]%20Mask%20Support)
