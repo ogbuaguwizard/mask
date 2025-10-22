@@ -35,24 +35,14 @@ You can copy the content of this file and use in your project, or any other way 
 
 ![Image vs Result](https://drive.google.com/uc?export=view&id=12rY3h0JKhiKkHStH-Uf4XCAsFXvUa8Z9)
 ![Image vs Result](https://drive.google.com/uc?export=view&id=12qXQvUCD7fl5c_nvsylaEqwJiSyr3EaU)
+![Image vs Result](https://github.com/ogbuaguwizard/mask/imgs/result.png)
 
 **Practical Example**
 
-Convert an image with some transparent area yourself, click *[here](https://ogbuaguwizard.github.io/projects/mask)*. Zoom out on the generated text to clearly see the 1s form the chosen image.
+Convert an image with some transparent area yourself, click *[here](https://mask-jade-beta.vercel.app)*. Zoom out on the generated text to clearly see the 1s form the chosen image.
 
 Check out *[this project](https://ogbuaguwizard.github.io/projects/NELCA%20Html5%20Game%20Courses/008%20Collision%20Detection/004%20Pixel%20Perfect%20Collision/)* where a generated mask was used to test for collision between two object.
-
-## Share your thought/experience
-
-You can send me an *[email](mailto:ogbuagu.wizard@gmail.com?subject=[GitHub]%20Mask%20Experience)* , or reach out to me on *[twitter](https://twitter.com/OgbuaguWizard)* 
 
 ## Appreciation
 
 Thanks for checking out the project, if you like the project please give it a star.
-
-### Support the project
-
-[paypal](https://www.paypal.me/ogbuagufrancis) 
-
-
-[Email](mailto:ogbuagu.wizard@gmail.com?subject=[GitHub]%20Mask%20Support)
