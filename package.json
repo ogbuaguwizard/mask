@@ -1,0 +1,23 @@
+{
+  "name": "mask",
+  "version": "2.0",
+  "description": "A simple program that Generates a binary representation of an image based on the alpha property ",
+  "main": "mask.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ogbuaguwizard/mask.git"
+  },
+  "keywords": [
+    "mask",
+    "Binary Map",
+    "Image to Binary Map",
+    "pixel perfect collision detection",
+    "html5 canvas"
+  ],
+  "author": "Ogbuagu Francis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ogbuaguwizard/mask/issues"
+  },
+  "homepage": "https://mask-jade-beta.vercel.app"
+}
