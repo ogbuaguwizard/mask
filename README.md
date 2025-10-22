@@ -35,8 +35,8 @@ You can copy the content of this file and use in your project, or any other way 
 <div align="center" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px;">
     <img src="https://github.com/ogbuaguwizard/mask/blob/main/imgs/result1.png" width="30%" />
     <img src="https://github.com/ogbuaguwizard/mask/blob/main/imgs/result2.png" width="30%" />
-    <img src="https://github.com/ogbuaguwizard/mask/blob/main/imgs/result3.png" width="30%" />
-    <img src="https://github.com/ogbuaguwizard/mask/blob/main/imgs/result4.png" width="30%" />
+    <img src="https://github.com/ogbuaguwizard/mask/blob/main/imgs/result3.jpg" width="30%" />
+    <img src="https://github.com/ogbuaguwizard/mask/blob/main/imgs/result4.jpg" width="30%" />
 </div>
 
 **Practical Example**
