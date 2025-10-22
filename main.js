@@ -1,4 +1,4 @@
-// main.js - Enhanced with modern UI interactions but same logic
+// main.js - Fixed version
 
 document.addEventListener('DOMContentLoaded', initApp);
 
@@ -15,12 +15,15 @@ const DOMElements = {
     resultsContainer: document.getElementById("resultsContainer"),
     resultsList: document.getElementById("resultsList"),
     dragArea: document.getElementById("drag-area"),
-    resultsCount: document.getElementById("resultsCount")
+    resultsCount: document.getElementById("resultsCount"),
+    resolutionGrid: document.querySelector('.resolution-grid')
 };
 
 let files = [];
 let imgs = [];
-const context = DOMElements.canvas.getContext('2d');
+
+// Fix for canvas performance warning
+const context = DOMElements.canvas.getContext('2d', { willReadFrequently: true });
 
 /**
  * Utility function to show a Bootstrap Toast notification.
@@ -53,17 +56,53 @@ function showToast(message, type = 'info') {
  * Clears previous image data and DOM elements.
  */
 function resetState() {
-    imgs.forEach(img => URL.revokeObjectURL(img.src));
+    imgs.forEach(img => {
+        if (img.src && img.src.startsWith('blob:')) {
+            URL.revokeObjectURL(img.src);
+        }
+    });
     files = [];
     imgs = [];
-    DOMElements.imgProp.innerHTML = "";
-    DOMElements.setDialog.innerHTML = "";
-    DOMElements.resultsList.innerHTML = "";
-    DOMElements.conversionSettings.style.display = 'none';
-    DOMElements.resultsContainer.style.display = 'none';
-    DOMElements.generateBtn.disabled = true;
-    DOMElements.originalRes.checked = true; // Default to original resolution
-    DOMElements.resultsCount.textContent = "0 Results";
+    
+    // Fix: Check if element exists before setting innerHTML
+    if (DOMElements.imgProp) {
+        DOMElements.imgProp.innerHTML = "";
+    }
+    
+    // Fix: Use the resolutionGrid element instead of setDialog
+    if (DOMElements.resolutionGrid) {
+        DOMElements.resolutionGrid.innerHTML = "";
+    }
+    
+    if (DOMElements.resultsList) {
+        DOMElements.resultsList.innerHTML = "";
+    }
+    
+    if (DOMElements.conversionSettings) {
+        DOMElements.conversionSettings.style.display = 'none';
+    }
+    
+    if (DOMElements.resultsContainer) {
+        DOMElements.resultsContainer.style.display = 'none';
+    }
+    
+    if (DOMElements.generateBtn) {
+        DOMElements.generateBtn.disabled = true;
+    }
+    
+    if (DOMElements.originalRes) {
+        DOMElements.originalRes.checked = true;
+    }
+    
+    if (DOMElements.resultsCount) {
+        DOMElements.resultsCount.textContent = "0 Results";
+    }
+    
+    // Clear selected images preview
+    const selectedImagesInfo = document.getElementById('selectedImagesInfo');
+    if (selectedImagesInfo) {
+        selectedImagesInfo.innerHTML = '';
+    }
 }
 
 /**
@@ -81,8 +120,13 @@ function processFiles(fileList) {
         return;
     }
 
-    DOMElements.conversionSettings.style.display = 'block';
-    DOMElements.generateBtn.disabled = false;
+    if (DOMElements.conversionSettings) {
+        DOMElements.conversionSettings.style.display = 'block';
+    }
+    
+    if (DOMElements.generateBtn) {
+        DOMElements.generateBtn.disabled = false;
+    }
     
     let imagesLoadedCount = 0;
     let imagesPreviewHTML = '<div class="selected-images-grid">';
@@ -95,13 +139,15 @@ function processFiles(fileList) {
         img.onload = function() {
             imagesLoadedCount++;
             
-            // Update Original Resolution Info
-            DOMElements.imgProp.innerHTML += `
-                <div class="d-inline-flex align-items-center me-3 mt-2">
-                    <img src="${img.src}" alt="${fileName}" width="20" class="rounded-circle me-2 border border-secondary">
-                    <span class="small text-muted-modern font-mono">${fileName}: ${img.naturalWidth}x${img.naturalHeight}</span>
-                </div>
-            `;
+            // Update Original Resolution Info - FIXED: Check if element exists
+            if (DOMElements.imgProp) {
+                DOMElements.imgProp.innerHTML += `
+                    <div class="d-inline-flex align-items-center me-3 mt-2">
+                        <img src="${img.src}" alt="${fileName}" width="20" class="rounded-circle me-2 border border-secondary">
+                        <span class="small text-muted-modern font-mono">${fileName}: ${img.naturalWidth}x${img.naturalHeight}</span>
+                    </div>
+                `;
+            }
             
             // Add Custom Resolution Inputs
             customResolutionHTML += `
@@ -140,8 +186,21 @@ function processFiles(fileList) {
             // Only after all images are loaded, show success toast
             if (imagesLoadedCount === files.length) {
                 imagesPreviewHTML += '</div>';
-                document.getElementById('selectedImagesInfo').innerHTML = imagesPreviewHTML;
-                document.querySelector('.resolution-grid').innerHTML = customResolutionHTML;
+                const selectedImagesInfo = document.getElementById('selectedImagesInfo');
+                if (selectedImagesInfo) {
+                    selectedImagesInfo.innerHTML = imagesPreviewHTML;
+                }
+                
+                // FIXED: Use resolutionGrid element
+                if (DOMElements.resolutionGrid) {
+                    DOMElements.resolutionGrid.innerHTML = customResolutionHTML;
+                    
+                    // Add event listener for "Apply to All" checkbox
+                    const setAllCheckbox = document.getElementById('setAll');
+                    if (setAllCheckbox) {
+                        setAllCheckbox.addEventListener('change', handleSetAll);
+                    }
+                }
                 showToast(`${files.length} image(s) loaded successfully. Ready to generate.`, "success");
             }
         };
@@ -178,6 +237,8 @@ function handleGlobalClick(e) {
  * Toggles the visibility of the custom resolution dialog.
  */
 function handleResolutionChange() {
+    if (!DOMElements.setCustomRes || !DOMElements.setDialog || !DOMElements.imgProp) return;
+    
     const isCustom = DOMElements.setCustomRes.checked;
     DOMElements.setDialog.style.display = isCustom ? 'block' : 'none';
     DOMElements.imgProp.style.display = isCustom ? 'none' : 'block';
@@ -202,21 +263,31 @@ function handleSetAll(e) {
         const checked = e.target.checked;
 
         if (setWidths.length > 0 && setHeights.length > 0) {
-            // The 'set all' checkbox is usually near the first set of inputs
-            // Let's rely on the first input's value for the master setting
+            // Get values from first input set
             const firstWidth = setWidths[0].value;
             const firstHeight = setHeights[0].value;
 
             setWidths.forEach((el, index) => {
-                if (index > 0 || checked) { // Apply to all if checked, including the master itself
+                if (checked) {
+                    // Apply to all inputs
                     el.value = firstWidth;
-                    el.disabled = checked;
+                    if (index > 0) {
+                        el.disabled = true;
+                    }
+                } else {
+                    // Enable all inputs when unchecked
+                    el.disabled = false;
                 }
             });
+            
             setHeights.forEach((el, index) => {
-                 if (index > 0 || checked) {
+                if (checked) {
                     el.value = firstHeight;
-                    el.disabled = checked;
+                    if (index > 0) {
+                        el.disabled = true;
+                    }
+                } else {
+                    el.disabled = false;
                 }
             });
         }
@@ -232,8 +303,14 @@ function generateMasks() {
         return;
     }
     
-    DOMElements.resultsList.innerHTML = ""; // Clear previous results
-    DOMElements.resultsContainer.style.display = 'block';
+    if (DOMElements.resultsList) {
+        DOMElements.resultsList.innerHTML = ""; // Clear previous results
+    }
+    
+    if (DOMElements.resultsContainer) {
+        DOMElements.resultsContainer.style.display = 'block';
+    }
+    
     showToast(`Starting mask generation for ${files.length} image(s)...`, "info");
 
     let processedCount = 0;
@@ -242,10 +319,17 @@ function generateMasks() {
         let width, height;
         
         try {
-            if (DOMElements.setCustomRes.checked) {
+            if (DOMElements.setCustomRes && DOMElements.setCustomRes.checked) {
                 // Get the specific width/height input elements using the data-index
-                width = parseInt(document.querySelector(`.setWidth[data-index="${index}"]`).value);
-                height = parseInt(document.querySelector(`.setHeight[data-index="${index}"]`).value);
+                const widthInput = document.querySelector(`.setWidth[data-index="${index}"]`);
+                const heightInput = document.querySelector(`.setHeight[data-index="${index}"]`);
+                
+                if (!widthInput || !heightInput) {
+                    throw new Error("Custom resolution inputs not found.");
+                }
+                
+                width = parseInt(widthInput.value);
+                height = parseInt(heightInput.value);
                 
                 if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
                     throw new Error("Invalid custom resolution.");
@@ -275,13 +359,14 @@ function generateMasks() {
         }
     });
 
-    DOMElements.resultsCount.textContent = `${processedCount} Result${processedCount !== 1 ? 's' : ''}`;
+    if (DOMElements.resultsCount) {
+        DOMElements.resultsCount.textContent = `${processedCount} Result${processedCount !== 1 ? 's' : ''}`;
+    }
     showToast("Generation complete! Check the output data below.", "success");
 }
 
 /**
  * Generates the binary mask array from image data.
- * (Functionality remains the same, ensuring core logic is preserved)
  */
 function generateBinaryMask(data, width, height) {
     const mask = [];
@@ -331,33 +416,39 @@ function displayResult(name, mask, width, height) {
             </div>
         </div>
     `;
-    DOMElements.resultsList.insertAdjacentHTML('beforeend', resultHTML);
+    
+    if (DOMElements.resultsList) {
+        DOMElements.resultsList.insertAdjacentHTML('beforeend', resultHTML);
+    }
     
     // Attach download event listener to the newly created button
-    const lastResultCard = DOMElements.resultsList.lastElementChild;
-    const downloadButton = lastResultCard.querySelector('.download-btn');
-    downloadButton.addEventListener('click', (e) => {
-        const btn = e.target.closest('.download-btn');
-        const url = btn.getAttribute('data-url');
-        const fileName = btn.getAttribute('data-name');
-        
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url); // Clean up the Blob URL immediately
-        showToast(`'${fileName}' downloaded successfully!`, "success");
-        // Remove the result card after download (optional, but good for cleanup)
-        btn.closest('.col-md-6').remove();
-    });
+    const downloadButtons = document.querySelectorAll('.download-btn');
+    const lastDownloadButton = downloadButtons[downloadButtons.length - 1];
+    
+    if (lastDownloadButton) {
+        lastDownloadButton.addEventListener('click', (e) => {
+            const btn = e.target.closest('.download-btn');
+            const url = btn.getAttribute('data-url');
+            const fileName = btn.getAttribute('data-name');
+            
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url); // Clean up the Blob URL immediately
+            showToast(`'${fileName}' downloaded successfully!`, "success");
+        });
+    }
 }
 
 /**
  * Initializes Drag and Drop handlers.
  */
 function setupDragAndDrop() {
+    if (!DOMElements.dragArea) return;
+    
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         DOMElements.dragArea.addEventListener(eventName, preventDefaults, false);
     });
@@ -393,11 +484,21 @@ function initApp() {
     DOMElements.canvas.height = 1;
 
     // Event listeners
-    DOMElements.imgFile.addEventListener('change', handleFileSelect);
+    if (DOMElements.imgFile) {
+        DOMElements.imgFile.addEventListener('change', handleFileSelect);
+    }
+    
     document.addEventListener("click", handleGlobalClick);
-    document.getElementById("conversionSettings").addEventListener('change', handleResolutionChange);
+    
+    const conversionSettings = document.getElementById("conversionSettings");
+    if (conversionSettings) {
+        conversionSettings.addEventListener('change', handleResolutionChange);
+    }
+    
     // Use event delegation for the 'setAll' checkbox since it's dynamically added
-    DOMElements.setDialog.addEventListener('change', handleSetAll);
+    if (DOMElements.setDialog) {
+        DOMElements.setDialog.addEventListener('change', handleSetAll);
+    }
 
     // Setup drag and drop functionality
     setupDragAndDrop();
