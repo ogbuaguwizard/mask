@@ -215,6 +215,8 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .result-title {
@@ -222,6 +224,10 @@ body {
     color: var(--accent);
     font-family: var(--font-mono);
     margin: 0;
+    word-break: break-all;
+    white-space: normal;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .result-meta {
