@@ -3,71 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mask: Convert Image to Binary Map</title>
+    
+    <title>MASK: Alpha Transparency to Binary Map Converter Tool</title>
+    <meta name="description" content="Convert PNG or transparent images to a binary matrix (0/1 map) based on alpha channel. Essential tool for game development, sprite masking, and data processing.">
+    <meta name="keywords" content="image to binary, alpha mask, transparency map, sprite mask, binary matrix, png to 01 map, game development tool, web utility">
+    <meta name="author" content="Ogbuaguwizard">
+    <meta property="og:title" content="MASK: Alpha Transparency to Binary Map Converter Tool">
+    <meta property="og:description" content="Convert PNG or transparent images to a binary matrix (0/1 map) based on alpha channel.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="./style.css">
 </head>
 <body class="bg-dark text-light">
     <div class="container my-5" id="main-container">
-        <h1 class="mb-4 text-center">🖼️ MASK: Image to Binary Map Converter</h1>
-        <p class="lead text-center">A program to generate a binary representation of an image based on its **alpha property** using canvas data.</p>
+        <h1 class="mb-4 text-center text-primary">
+            <span class="font-monospace">&lt;MASK/&gt;</span>: Image Alpha to Binary Map
+        </h1>
+        <p class="lead text-center text-muted">Generate a binary representation (0/1 matrix) of an image, strictly based on its alpha transparency.</p>
         <p class="text-center">
-            Check out the full documentation and other practical examples on 
-            <a href="https://github.com/ogbuaguwizard/mask/" class="link-info">GitHub</a>
+            Documentation: 
+            <a href="https://github.com/ogbuaguwizard/mask/" class="link-info text-decoration-none">github.com/ogbuaguwizard/mask/</a>
         </p>
 
-        <hr class="my-4">
+        <hr class="my-4 border-secondary">
 
-        <div class="card bg-secondary text-white shadow-lg p-4 mb-4">
-            <h2 class="card-title mb-3">1. Select Image(s)</h2>
-            <div id="imgContainer" class="text-center">
-                <input type="file" accept="image/*" id="imgFile" multiple class="d-none">
-                <button class="btn btn-primary btn-lg" id="choose">
-                    <i class="bi bi-upload"></i> Choose Image(s)
-                </button>
+        <div class="card bg-secondary text-white shadow-lg p-4 mb-4 border-primary">
+            <h2 class="card-title mb-3 text-info">1. Upload Image(s)</h2>
+            <div id="drag-area" class="text-center p-5 border border-dashed border-info rounded-3">
+                <p class="h4 text-info mb-3">
+                    <i class="bi bi-file-earmark-arrow-up"></i> Drag & Drop Images Here
+                </p>
+                <p class="text-muted">or</p>
+                <div id="imgContainer">
+                    <input type="file" accept="image/png, image/jpeg, image/webp" id="imgFile" multiple class="d-none">
+                    <button class="btn btn-primary btn-lg" id="choose">
+                        Browse Files
+                    </button>
+                </div>
             </div>
             
             <div id="selectedImagesInfo" class="mt-3">
                 </div>
         </div>
         
-        <div id="conversionSettings" class="card bg-secondary text-white shadow-lg p-4 mb-4" style="display: none;">
-            <h2 class="card-title mb-3">2. Set Resolution</h2>
+        <div id="conversionSettings" class="card bg-secondary text-white shadow-lg p-4 mb-4 border-primary" style="display: none;">
+            <h2 class="card-title mb-3 text-info">2. Resolution Settings</h2>
             <fieldset class="border-0">
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="res" id="originalRes" checked>
-                    <label class="form-check-label" for="originalRes">
+                    <label class="form-check-label text-light" for="originalRes">
                         Use **Original** resolution.
-                        <span id="imgProp" class="text-info small ms-2"></span>
+                        <span id="imgProp" class="text-warning small ms-2"></span>
                     </label>
                 </div>
                 
                 <div class="form-check mt-2">
                     <input class="form-check-input" type="radio" name="res" id="setCustomRes">
-                    <label class="form-check-label" for="setCustomRes">
+                    <label class="form-check-label text-light" for="setCustomRes">
                         Set **Custom** resolution.
                     </label>
                 </div>
 
-                <div id="setDialog" class="mt-3 p-3 border border-dark rounded bg-dark-subtle" style="display: none;">
+                <div id="setDialog" class="mt-3 p-3 border border-warning rounded bg-dark-subtle" style="display: none;">
                     </div>
             </fieldset>
         </div>
 
         <div class="text-center mb-5">
-            <button class="btn btn-success btn-lg shadow-sm" id="gen" disabled>
-                <i class="bi bi-gear-fill"></i> Generate Binary Map
+            <button class="btn btn-success btn-lg shadow-sm font-monospace" id="gen" disabled>
+                <i class="bi bi-cpu"></i> Execute Generation
             </button>
         </div>
         
         <div id="resultsContainer" class="mt-5" style="display: none;">
-            <h2 class="text-center mb-4">3. Results ✨</h2>
+            <h2 class="text-center mb-4 text-warning">3. Output Data ✨</h2>
             <div id="resultsList" class="row g-4">
                 </div>
         </div>
 
         <div class="text-center mt-5">
-            <p class="small text-muted">Ogbuaguwizard 2024</p>
+            <p class="small text-muted font-monospace">&copy; Ogbuaguwizard 2024</p>
         </div>
     </div>
     
