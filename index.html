@@ -1,102 +1,150 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Mask: Convert image to binary map based on alpha value</title>
-        <style>
-            body{
-                font-family:Verdana, Geneva, sans-serif ;
-            }
-            #container{
-                position: absolute; 
-                margin-top: 50px;
-                text-align: center; 
-                width: 100%;
-            }
-            #imgContainer{
-                position: relative; 
-                /* border:1px solid red;  */
-            }
-            .button{
-                cursor:pointer; 
-                padding:2px 3px; 
-                margin: 5px 0 0 0; 
-                font-size: 2em;
-                font-family:Verdana, Geneva, sans-serif ;
-                border: 1px solid dimgray;
-                border-radius: 5%;
-            }
-            .button:hover{
-                font-size: 2.1em;
-                padding:0 2px; 
-            }
-            #imgFile{
-                display: none;
-            }
-            .setHeight,.setWidth{
-                width: 50px;
-            }
-            .label{
-                /* display: block; */
-                font-size: 1.5em;
-            }
-            #setDialog{
-                display: none;
-            }
-            fieldset{
-                border: none;
-                border-top:1px solid grey;
-                margin-top: 20px;
-            }
-            /* #canvas{
-                border:1px solid black;
-            } */
-        </style>
-    </head>
-    <body>   
-            <div id="container">
-                <p style="text-align: left;"><strong>MASK</strong>: is a program  that uses the canvas imageData to Generate a binary representation of an image, based on the alpha property.</p>
-                <p style="text-align: left;">Check out the full documentation and other practical examples on <a href="https://github.com/ogbuaguwizard/mask/">Github</a></p>
-                <div style="margin: auto;">
-                    <br>
-                    <hr>
-                    <br>
-                    <div id="imgContainer">
-                        <label>
-                            <!-- <img src=""  alt="Image" id="img"> -->
-                            <input type="file" accept="image/*" id="imgFile" multiple>
-                        <p></p>
-                        <span class="button" id="choose"> Choose Img</span>
-                        </label>
-                        
-                    </div>
-                    <div>
-                        <fieldset>
-                            <legend> Set the desired resolution</legend>
-                                <label class="label">
-                                    Use Original resolution.
-                                    <input type="radio" id="original" name="res" checked>
-                                    <span id="imgProp" style="font-size: medium;"></span>
-                                </label> 
-                                <br>
-                                <label class="label">
-                                    Set preferred resolution.
-                                    <input type="radio" id="setRes" name="res">
-                                </label>
-                                <div id="setDialog">
-                                    
-                                </div>
-                           
-                        </fieldset>  
-                    </div>   
-                    <p class="buttonContainer"><span class="button" id="gen">Generate</span></p>
-                </div>
-                <p style="margin-top: 50px; color: grey;">Ogbuaguwizard 2022</p>
-            </div>
-    
-            <canvas id="canvas">
-                Your browser does not support the HTML 5 Canvas.
-            </canvas>
-        <script src="./main.js"></script>
-    </body>
+<head>
+  <meta charset="UTF-8" />
+  <title>Mask Generator – Alpha-Based Binary Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --text: #111827;
+    }
+
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin: 2rem 0 1rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.25rem;
+    }
+
+    p.subtitle {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      width: min(95%, 600px);
+      text-align: center;
+    }
+
+    .button {
+      background: var(--accent);
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+
+    .button:hover {
+      background: var(--accent-hover);
+    }
+
+    #imgPreview {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem 0;
+    }
+
+    #imgPreview img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+
+    fieldset {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 1.2rem 0;
+      padding-top: 1rem;
+    }
+
+    legend {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    label {
+      display: block;
+      margin: 0.5rem 0;
+    }
+
+    #setDialog input {
+      width: 80px;
+      margin-left: 5px;
+    }
+
+    footer {
+      margin-top: 2rem;
+      color: #777;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🖼️ Mask Generator</h1>
+    <p class="subtitle">Convert images into binary maps using alpha transparency.</p>
+  </header>
+
+  <div class="card">
+    <p>
+      Upload one or more images to generate their binary mask files.
+    </p>
+
+    <input type="file" id="imgFile" accept="image/*" multiple hidden>
+    <button id="chooseBtn" class="button">Choose Images</button>
+
+    <div id="imgPreview"></div>
+
+    <fieldset>
+      <legend>Resolution</legend>
+      <label>
+        <input type="radio" name="res" id="original" checked> Use Original Resolution
+      </label>
+      <label>
+        <input type="radio" name="res" id="setRes"> Set Preferred Resolution
+      </label>
+      <div id="setDialog"></div>
+    </fieldset>
+
+    <button id="generateBtn" class="button">Generate Masks</button>
+  </div>
+
+  <footer>
+    <p>© Ogbuaguwizard – 2025</p>
+  </footer>
+
+  <canvas id="canvas" hidden></canvas>
+  <script src="./main.js"></script>
+</body>
 </html>
