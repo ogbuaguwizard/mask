@@ -1,97 +1,325 @@
-window.addEventListener("DOMContentLoaded", () => {
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
-  const imgFile = document.getElementById("imgFile");
-  const chooseBtn = document.getElementById("chooseBtn");
-  const generateBtn = document.getElementById("generateBtn");
-  const setRes = document.getElementById("setRes");
-  const original = document.getElementById("original");
-  const imgPreview = document.getElementById("imgPreview");
-  const setDialog = document.getElementById("setDialog");
+// main.js
 
-  let files = [];
-  let imgs = [];
+document.addEventListener('DOMContentLoaded', initApp);
 
-  // ============ FILE SELECTION ============
-  chooseBtn.addEventListener("click", () => imgFile.click());
+const DOMElements = {
+    canvas: document.getElementById("canvas"),
+    imgFile: document.getElementById("imgFile"),
+    setCustomRes: document.getElementById("setCustomRes"),
+    originalRes: document.getElementById("originalRes"),
+    chooseBtn: document.getElementById("choose"),
+    generateBtn: document.getElementById("gen"),
+    setDialog: document.getElementById("setDialog"),
+    imgProp: document.getElementById("imgProp"),
+    conversionSettings: document.getElementById("conversionSettings"),
+    resultsContainer: document.getElementById("resultsContainer"),
+    resultsList: document.getElementById("resultsList"),
+};
 
-  imgFile.addEventListener("change", async () => {
-    imgPreview.innerHTML = "";
-    setDialog.innerHTML = "";
-    files = Array.from(imgFile.files);
-    imgs = [];
+let files = [];
+let imgs = [];
+const context = DOMElements.canvas.getContext('2d');
 
-    if (!files.length) return;
-
-    for (let [i, file] of files.entries()) {
-      const img = document.createElement("img");
-      img.src = URL.createObjectURL(file);
-      img.alt = file.name;
-      img.dataset.index = i;
-      imgPreview.appendChild(img);
-
-      await new Promise((res) => (img.onload = res));
-      imgs.push(img);
-
-      setDialog.innerHTML += `
-        <div>
-          <img src="${img.src}" width="30">
-          <label>Width: <input type="number" id="width${i}" value="${img.naturalWidth}" min="1"></label>
-          <label>Height: <input type="number" id="height${i}" value="${img.naturalHeight}" min="1"></label>
+/**
+ * Utility function to show a Bootstrap Toast notification.
+ * @param {string} message - The message to display.
+ * @param {string} type - The type of toast (e.g., 'success', 'danger', 'info').
+ */
+function showToast(message, type = 'info') {
+    const toastContainer = document.querySelector('.toast-container');
+    const toastHTML = `
+        <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
         </div>
-      `;
+    `;
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+    const toastEl = toastContainer.lastElementChild;
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+    
+    // Remove toast element after it's hidden to prevent DOM clutter
+    toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+}
+
+/**
+ * Clears previous image data and DOM elements.
+ */
+function resetState() {
+    imgs.forEach(img => URL.revokeObjectURL(img.src));
+    files = [];
+    imgs = [];
+    DOMElements.imgProp.innerHTML = "";
+    DOMElements.setDialog.innerHTML = "";
+    DOMElements.resultsList.innerHTML = "";
+    DOMElements.conversionSettings.style.display = 'none';
+    DOMElements.resultsContainer.style.display = 'none';
+    DOMElements.generateBtn.disabled = true;
+    DOMElements.originalRes.checked = true; // Default to original resolution
+}
+
+/**
+ * Handles the file selection process.
+ */
+function handleFileSelect() {
+    resetState(); // Clear previous selection
+
+    files = Array.from(DOMElements.imgFile.files);
+    
+    if (files.length === 0) {
+        showToast("No file selected.", "warning");
+        return;
     }
-  });
 
-  // ============ RESOLUTION TOGGLE ============
-  [setRes, original].forEach((input) =>
-    input.addEventListener("change", () => {
-      setDialog.style.display = setRes.checked ? "block" : "none";
-    })
-  );
+    DOMElements.conversionSettings.style.display = 'block';
+    DOMElements.generateBtn.disabled = false;
+    
+    let firstImgLoaded = false;
+    
+    files.forEach((file, index) => {
+        const fileName = file.name.replace(/\.[^/.]+$/, "");
+        
+        const img = new Image();
+        img.onload = function() {
+            // Update Original Resolution Info
+            DOMElements.imgProp.innerHTML += `
+                <div class="d-inline-flex align-items-center me-3 mt-2">
+                    <img src="${img.src}" alt="${fileName}" width="20" class="rounded-circle me-2">
+                    <span class="small text-muted">${fileName}: ${img.naturalWidth}x${img.naturalHeight}</span>
+                </div>
+            `;
+            
+            // Add Custom Resolution Inputs
+            const setDialogHTML = `
+                <div class="d-flex align-items-center mb-2">
+                    <img src="${img.src}" alt="${fileName}" width="20" class="rounded-circle me-2">
+                    <span class="text-white-50 small me-3">${fileName}</span>
+                    <label class="small me-2">W:</label>
+                    <input type="number" class="form-control form-control-sm setWidth me-3" data-index="${index}" value="32" style="width: 70px;">
+                    <label class="small me-2">H:</label>
+                    <input type="number" class="form-control form-control-sm setHeight" data-index="${index}" value="32" style="width: 70px;">
+                    ${(index === 0 && files.length > 1) ? 
+                        `<div class="form-check ms-3">
+                            <input class="form-check-input" type="checkbox" id="setAll">
+                            <label class="form-check-label small" for="setAll">Apply to All</label>
+                        </div>` 
+                        : ''}
+                </div>
+            `;
+            DOMElements.setDialog.innerHTML += setDialogHTML;
 
-  // ============ GENERATE MASKS ============
-  generateBtn.addEventListener("click", async () => {
-    if (!imgs.length) {
-      alert("Please choose at least one image.");
-      return;
+            // Only after all images are loaded, show success toast
+            if (imgs.length === files.length) {
+                showToast(`${files.length} image(s) loaded successfully.`, "success");
+            }
+        };
+
+        img.onerror = () => showToast(`Error loading image: ${fileName}`, "danger");
+        
+        img.src = window.URL.createObjectURL(file);
+        img.name = fileName; // Use the cleaned filename
+        imgs.push(img);
+    });
+}
+
+/**
+ * Handles click events for Choose Img and Generate.
+ * @param {Event} e 
+ */
+function handleGlobalClick(e) {
+    if (e.target === DOMElements.chooseBtn) {
+        // Clear old state and trigger file input
+        DOMElements.imgFile.click(); 
+    } else if (e.target === DOMElements.generateBtn) {
+        generateMasks();
     }
+}
 
-    for (let [i, img] of imgs.entries()) {
-      const w = setRes.checked
-        ? parseInt(document.getElementById(`width${i}`).value)
-        : img.naturalWidth;
-      const h = setRes.checked
-        ? parseInt(document.getElementById(`height${i}`).value)
-        : img.naturalHeight;
+/**
+ * Toggles the visibility of the custom resolution dialog.
+ */
+function handleResolutionChange() {
+    const isCustom = DOMElements.setCustomRes.checked;
+    DOMElements.setDialog.style.display = isCustom ? 'block' : 'none';
+    DOMElements.imgProp.style.display = isCustom ? 'none' : 'block';
+    
+    // Prevent selecting custom resolution if no files are loaded
+    if (isCustom && files.length === 0) {
+        DOMElements.setCustomRes.checked = false;
+        DOMElements.originalRes.checked = true;
+        DOMElements.setDialog.style.display = 'none';
+        DOMElements.imgProp.style.display = 'block';
+        showToast("Please select an image first.", "warning");
+    }
+}
 
-      canvas.width = w;
-      canvas.height = h;
-      ctx.clearRect(0, 0, w, h);
-      ctx.drawImage(img, 0, 0, w, h);
+/**
+ * Applies the first custom width/height to all inputs if 'Apply to All' is checked.
+ */
+function handleSetAll(e) {
+    if (e.target.id === 'setAll') {
+        const setWidths = Array.from(document.querySelectorAll('.setWidth'));
+        const setHeights = Array.from(document.querySelectorAll('.setHeight'));
+        const checked = e.target.checked;
 
-      const data = ctx.getImageData(0, 0, w, h).data;
-      const mask = [];
+        if (setWidths.length > 0 && setHeights.length > 0) {
+            const firstWidth = setWidths[0].value;
+            const firstHeight = setHeights[0].value;
 
-      for (let y = 0; y < h; y++) {
-        const row = [];
-        for (let x = 0; x < w; x++) {
-          const alpha = data[(y * w + x) * 4 + 3];
-          row.push(alpha > 0 ? 1 : 0);
+            setWidths.forEach((el, index) => {
+                if (index > 0) { // Skip the 'set all' master input
+                    el.value = checked ? firstWidth : el.getAttribute('data-initial-value') || 32;
+                    el.disabled = checked;
+                }
+            });
+            setHeights.forEach((el, index) => {
+                 if (index > 0) {
+                    el.value = checked ? firstHeight : el.getAttribute('data-initial-value') || 32;
+                    el.disabled = checked;
+                }
+            });
         }
-        mask.push(row);
-      }
-
-      const mapText = JSON.stringify(mask, null, 1);
-      const blob = new Blob([mapText], { type: "text/plain" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `${img.alt.replace(/\.[^/.]+$/, "")}_mask.txt`;
-      a.click();
-
-      URL.revokeObjectURL(a.href);
     }
+}
 
-    alert("✅ Mask files generated successfully!");
-  });
-});
+/**
+ * Processes all loaded images to generate binary masks.
+ */
+function generateMasks() {
+    if (files.length === 0) {
+        showToast("No images selected.", "danger");
+        return;
+    }
+    
+    DOMElements.resultsList.innerHTML = ""; // Clear previous results
+    DOMElements.resultsContainer.style.display = 'block';
+    showToast(`Starting mask generation for ${files.length} image(s)...`, "info");
+
+    imgs.forEach((img, index) => {
+        let width, height;
+        
+        if (DOMElements.setCustomRes.checked) {
+            width = parseInt(document.querySelector(`.setWidth[data-index="${index}"]`).value);
+            height = parseInt(document.querySelector(`.setHeight[data-index="${index}"]`).value);
+            
+            if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+                showToast(`Invalid custom resolution for ${img.name}. Skipping.`, "danger");
+                return;
+            }
+        } else {
+            width = img.naturalWidth;
+            height = img.naturalHeight;
+        }
+
+        // Set canvas to the required size for the current image
+        DOMElements.canvas.width = width;
+        DOMElements.canvas.height = height;
+
+        // Draw and get image data
+        context.clearRect(0, 0, width, height);
+        context.drawImage(img, 0, 0, width, height);
+        const imageData = context.getImageData(0, 0, width, height);
+        
+        const mask = generateBinaryMask(imageData.data, width, height);
+        
+        // Display result and create download option
+        displayResult(img.name, mask, width, height);
+    });
+
+    showToast("Generation complete!", "success");
+}
+
+/**
+ * Generates the binary mask array from image data.
+ * @param {Uint8ClampedArray} data - The array containing [R, G, B, A] values.
+ * @param {number} width 
+ * @param {number} height 
+ * @returns {number[][]} The 2D binary mask array.
+ */
+function generateBinaryMask(data, width, height) {
+    const mask = [];
+    for (let i = 0; i < height; i++) {
+        mask[i] = [];
+        for (let j = 0; j < width; j++) {
+            // Alpha channel is at index ( (j + i * width) * 4 ) + 3
+            const alphaIndex = (j + i * width) * 4 + 3;
+            // The mask is 1 (visible) if alpha is not 0, and 0 (transparent) if alpha is 0.
+            mask[i][j] = (data[alphaIndex] !== 0) ? 1 : 0;
+        }
+    }
+    return mask;
+}
+
+/**
+ * Creates the formatted text for the mask and triggers download.
+ * @param {string} name - The original file name.
+ * @param {number[][]} mask - The generated binary mask array.
+ * @param {number} width - The width of the mask.
+ * @param {number} height - The height of the mask.
+ */
+function displayResult(name, mask, width, height) {
+    // Stringify and format the 2D array for readability in the text file
+    let map = JSON.stringify(mask);
+    // Add newlines after each inner array for better text file formatting
+    map = map.replace(/\],/g, '],\n'); 
+
+    // Create a Blob for the file
+    const fileBlob = new Blob([map], {type: "text/plain"});
+    const downloadURL = URL.createObjectURL(fileBlob);
+
+    const resultHTML = `
+        <div class="col-md-6 col-lg-4">
+            <div class="card bg-dark result-card">
+                <div class="card-body">
+                    <h5 class="card-title text-info">${name}.txt</h5>
+                    <p class="card-text small text-muted">Resolution: ${width}x${height}</p>
+                    <p class="card-text small text-muted">File Size: ${(fileBlob.size / 1024).toFixed(2)} KB</p>
+                    <button class="btn btn-sm btn-outline-info download-btn" data-url="${downloadURL}" data-name="${name}.txt">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                    <pre class="bg-black text-success p-2 mt-2 rounded small overflow-auto" style="max-height: 100px;">${map.substring(0, 200)}...</pre>
+                </div>
+            </div>
+        </div>
+    `;
+    DOMElements.resultsList.insertAdjacentHTML('beforeend', resultHTML);
+    
+    // Clean up the URL when the download link is clicked and the element is removed
+    const lastResultCard = DOMElements.resultsList.lastElementChild;
+    const downloadButton = lastResultCard.querySelector('.download-btn');
+    downloadButton.addEventListener('click', (e) => {
+        const url = e.target.closest('.download-btn').getAttribute('data-url');
+        const fileName = e.target.closest('.download-btn').getAttribute('data-name');
+        
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url); // Clean up the Blob URL immediately
+        showToast(`${fileName} downloaded successfully!`, "success");
+    });
+}
+
+/**
+ * Initializes all event listeners.
+ */
+function initApp() {
+    // Initial canvas setup
+    DOMElements.canvas.width = 1;
+    DOMElements.canvas.height = 1;
+
+    // Event listeners
+    DOMElements.imgFile.addEventListener('change', handleFileSelect);
+    document.addEventListener("click", handleGlobalClick);
+    document.getElementById("conversionSettings").addEventListener('change', handleResolutionChange);
+    document.getElementById("setDialog").addEventListener('change', handleSetAll);
+
+    // Initial check for resolution settings
+    handleResolutionChange();
+}
