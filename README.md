@@ -21,9 +21,9 @@ It was originally developed to test for pixel perfect collision between objects 
 
 ## How to use
 
-Click on the **Choose Img** button and select the image to be converted,
+Click on the **Browse File** button and select the image to be converted or simply drag and drop the selection,
 Choose image resolution by checking the radio button or use the original resolution(which will be visible after an image has been selected),
-Click **Generate** button and the result will be downloaded as a .txt file.
+Click **Generate Binary Maps** button and the result can be downloaded as a .txt file.
 You can copy the content of this file and use in your project, or any other way you've discovered to use this file.
 
 > **Note:** Incase of collision detection in Html5 canvas, the chosen resolution has to match the width and height of object drawn on the canvas, not neccesarily the original resolution.
