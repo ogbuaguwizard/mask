@@ -19,84 +19,131 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="./style.css">
 </head>
-<body class="bg-dark text-light">
-    <div class="container my-5" id="main-container">
-        <h1 class="mb-4 text-center text-primary">
-            <span class="font-monospace">&lt;MASK/&gt;</span>: Image Alpha to Binary Map
-        </h1>
-        <p class="lead text-center text-muted">Generate a binary representation (0/1 matrix) of an image, strictly based on its alpha transparency.</p>
-        <p class="text-center">
-            Documentation: 
-            <a href="https://github.com/ogbuaguwizard/mask/" class="link-info text-decoration-none">github.com/ogbuaguwizard/mask/</a>
-        </p>
+<body class="github-style">
+    <!-- GitHub Corner -->
+    <a href="https://github.com/ogbuaguwizard/mask/" class="github-corner" aria-label="View source on GitHub">
+        <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#2ea043; color:#0d1117; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+            <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+            <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+            <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+        </svg>
+    </a>
 
-        <hr class="my-4 border-secondary">
-
-        <div class="card bg-secondary text-white shadow-lg p-4 mb-4 border-primary">
-            <h2 class="card-title mb-3 text-info">1. Upload Image(s)</h2>
-            <div id="drag-area" class="text-center p-5 border border-dashed border-info rounded-3">
-                <p class="h4 text-info mb-3">
-                    <i class="bi bi-file-earmark-arrow-up"></i> Drag & Drop Images Here
-                </p>
-                <p class="text-muted">or</p>
-                <div id="imgContainer">
-                    <input type="file" accept="image/png, image/jpeg, image/webp" id="imgFile" multiple class="d-none">
-                    <button class="btn btn-primary btn-lg" id="choose">
-                        Browse Files
-                    </button>
+    <div class="container py-4" id="main-container">
+        <!-- Header -->
+        <header class="header-gradient rounded-3 p-4 mb-5 position-relative overflow-hidden">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="brand mb-2">
+                        &lt;<span>MASK</span>/&gt;
+                    </h1>
+                    <p class="subtitle mb-0">Generate a binary representation (0/1 matrix) of an image, strictly based on its alpha transparency.</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <span class="badge badge-modern px-3 py-2">v2.0</span>
                 </div>
             </div>
-            
-            <div id="selectedImagesInfo" class="mt-3">
-                </div>
-        </div>
-        
-        <div id="conversionSettings" class="card bg-secondary text-white shadow-lg p-4 mb-4 border-primary" style="display: none;">
-            <h2 class="card-title mb-3 text-info">2. Resolution Settings</h2>
-            <fieldset class="border-0">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="res" id="originalRes" checked>
-                    <label class="form-check-label text-light" for="originalRes">
-                        Use **Original** resolution.
-                        <span id="imgProp" class="text-warning small ms-2"></span>
-                    </label>
+        </header>
+
+        <!-- Upload Section -->
+        <div class="modern-card mb-4">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    Upload Image(s)
+                </h2>
+            </div>
+            <div class="card-body">
+                <div id="drag-area" class="drag-area">
+                    <div class="drag-icon">
+                        <i class="bi bi-file-earmark-image"></i>
+                    </div>
+                    <p class="h5 mb-2">Drag & Drop Images Here</p>
+                    <p class="text-muted-modern mb-3">Supports PNG, JPEG, and WebP formats</p>
+                    <div id="imgContainer">
+                        <input type="file" accept="image/png, image/jpeg, image/webp" id="imgFile" multiple class="d-none">
+                        <button class="btn btn-primary-modern btn-modern" id="choose">
+                            <i class="bi bi-folder2-open me-2"></i>Browse Files
+                        </button>
+                    </div>
                 </div>
                 
-                <div class="form-check mt-2">
-                    <input class="form-check-input" type="radio" name="res" id="setCustomRes">
-                    <label class="form-check-label text-light" for="setCustomRes">
-                        Set **Custom** resolution.
-                    </label>
+                <div id="selectedImagesInfo" class="mt-4">
+                    <!-- Selected images will appear here -->
                 </div>
-
-                <div id="setDialog" class="mt-3 p-3 border border-warning rounded bg-dark-subtle" style="display: none;">
+            </div>
+        </div>
+        
+        <!-- Conversion Settings -->
+        <div id="conversionSettings" class="modern-card mb-4" style="display: none;">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="bi bi-sliders"></i>
+                    Resolution Settings
+                </h2>
+            </div>
+            <div class="card-body">
+                <fieldset class="border-0">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="res" id="originalRes" checked>
+                        <label class="form-check-label text-light" for="originalRes">
+                            Use <strong>Original</strong> resolution
+                            <span id="imgProp" class="text-warning small ms-2"></span>
+                        </label>
                     </div>
-            </fieldset>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="res" id="setCustomRes">
+                        <label class="form-check-label text-light" for="setCustomRes">
+                            Set <strong>Custom</strong> resolution
+                        </label>
+                    </div>
+
+                    <div id="setDialog" class="p-3 border-modern border rounded bg-darker" style="display: none;">
+                        <div class="resolution-grid">
+                            <!-- Custom resolution inputs will be added here -->
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
         </div>
 
+        <!-- Generate Button -->
         <div class="text-center mb-5">
-            <button class="btn btn-success btn-lg shadow-sm font-monospace" id="gen" disabled>
-                <i class="bi bi-cpu"></i> Execute Generation
+            <button class="btn btn-accent btn-modern px-4 py-2 shadow" id="gen" disabled>
+                <i class="bi bi-cpu-fill me-2"></i>Generate Binary Maps
             </button>
         </div>
         
+        <!-- Results Section -->
         <div id="resultsContainer" class="mt-5" style="display: none;">
-            <h2 class="text-center mb-4 text-warning">3. Output Data ✨</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-accent mb-0">
+                    <i class="bi bi-code-square me-2"></i>Output Data
+                </h2>
+                <span class="badge badge-modern" id="resultsCount">0 Results</span>
+            </div>
             <div id="resultsList" class="row g-4">
-                </div>
+                <!-- Results will be added here -->
+            </div>
         </div>
 
-        <div class="text-center mt-5">
-            <p class="small text-muted font-monospace">&copy; Ogbuaguwizard 2024</p>
-        </div>
+        <!-- Footer -->
+        <footer class="footer text-center">
+            <p class="text-muted-modern mb-2 font-mono">Made with <i class="bi bi-heart-fill text-danger"></i> by Ogbuaguwizard</p>
+            <p class="small text-muted-modern font-mono">© 2024 | MIT License</p>
+        </footer>
     </div>
     
     <canvas id="canvas" class="d-none"></canvas>
     
+    <!-- Toast Container -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        </div>
+        <!-- Toasts will be added here -->
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="./main.js"></script>
 </body>
 </html>
+
