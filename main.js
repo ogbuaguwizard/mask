@@ -1,4 +1,4 @@
-// main.js
+// main.js - Enhanced with modern UI interactions but same logic
 
 document.addEventListener('DOMContentLoaded', initApp);
 
@@ -14,7 +14,8 @@ const DOMElements = {
     conversionSettings: document.getElementById("conversionSettings"),
     resultsContainer: document.getElementById("resultsContainer"),
     resultsList: document.getElementById("resultsList"),
-    dragArea: document.getElementById("drag-area"), // New
+    dragArea: document.getElementById("drag-area"),
+    resultsCount: document.getElementById("resultsCount")
 };
 
 let files = [];
@@ -29,9 +30,10 @@ const context = DOMElements.canvas.getContext('2d');
 function showToast(message, type = 'info') {
     const toastContainer = document.querySelector('.toast-container');
     const toastHTML = `
-        <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast toast-modern align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'}-fill me-2"></i>
                     ${message}
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
@@ -61,6 +63,7 @@ function resetState() {
     DOMElements.resultsContainer.style.display = 'none';
     DOMElements.generateBtn.disabled = true;
     DOMElements.originalRes.checked = true; // Default to original resolution
+    DOMElements.resultsCount.textContent = "0 Results";
 }
 
 /**
@@ -82,6 +85,8 @@ function processFiles(fileList) {
     DOMElements.generateBtn.disabled = false;
     
     let imagesLoadedCount = 0;
+    let imagesPreviewHTML = '<div class="selected-images-grid">';
+    let customResolutionHTML = '';
     
     files.forEach((file, index) => {
         const fileName = file.name.replace(/\.[^/.]+$/, "");
@@ -94,31 +99,49 @@ function processFiles(fileList) {
             DOMElements.imgProp.innerHTML += `
                 <div class="d-inline-flex align-items-center me-3 mt-2">
                     <img src="${img.src}" alt="${fileName}" width="20" class="rounded-circle me-2 border border-secondary">
-                    <span class="small text-muted font-monospace">${fileName}: ${img.naturalWidth}x${img.naturalHeight}</span>
+                    <span class="small text-muted-modern font-mono">${fileName}: ${img.naturalWidth}x${img.naturalHeight}</span>
                 </div>
             `;
             
             // Add Custom Resolution Inputs
-            const setDialogHTML = `
-                <div class="d-flex align-items-center mb-2">
-                    <img src="${img.src}" alt="${fileName}" width="20" class="rounded-circle me-2 border border-secondary">
-                    <span class="text-white-50 small me-3 font-monospace">${fileName}</span>
-                    <label class="small me-2">W:</label>
-                    <input type="number" class="form-control form-control-sm setWidth me-3" data-index="${index}" value="32" style="width: 70px;">
-                    <label class="small me-2">H:</label>
-                    <input type="number" class="form-control form-control-sm setHeight" data-index="${index}" value="32" style="width: 70px;">
+            customResolutionHTML += `
+                <div class="resolution-item">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="${img.src}" alt="${fileName}" width="24" class="rounded-circle me-2 border border-secondary">
+                        <span class="text-white-50 small font-mono">${fileName}</span>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label small">Width</label>
+                            <input type="number" class="form-control form-control-sm setWidth" data-index="${index}" value="32" min="1">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small">Height</label>
+                            <input type="number" class="form-control form-control-sm setHeight" data-index="${index}" value="32" min="1">
+                        </div>
+                    </div>
                     ${(index === 0 && files.length > 1) ? 
-                        `<div class="form-check ms-3">
+                        `<div class="form-check mt-3">
                             <input class="form-check-input" type="checkbox" id="setAll">
                             <label class="form-check-label small text-warning" for="setAll">Apply to All</label>
                         </div>` 
                         : ''}
                 </div>
             `;
-            DOMElements.setDialog.innerHTML += setDialogHTML;
+
+            // Add image preview
+            imagesPreviewHTML += `
+                <div class="image-preview">
+                    <img src="${img.src}" alt="${fileName}">
+                    <div class="image-name">${fileName}</div>
+                </div>
+            `;
 
             // Only after all images are loaded, show success toast
             if (imagesLoadedCount === files.length) {
+                imagesPreviewHTML += '</div>';
+                document.getElementById('selectedImagesInfo').innerHTML = imagesPreviewHTML;
+                document.querySelector('.resolution-grid').innerHTML = customResolutionHTML;
                 showToast(`${files.length} image(s) loaded successfully. Ready to generate.`, "success");
             }
         };
@@ -213,6 +236,8 @@ function generateMasks() {
     DOMElements.resultsContainer.style.display = 'block';
     showToast(`Starting mask generation for ${files.length} image(s)...`, "info");
 
+    let processedCount = 0;
+    
     imgs.forEach((img, index) => {
         let width, height;
         
@@ -243,12 +268,14 @@ function generateMasks() {
             
             // Display result and create download option
             displayResult(img.name, mask, width, height);
+            processedCount++;
 
         } catch (error) {
             showToast(`Skipping ${img.name}: ${error.message || "An error occurred during processing."}`, "danger");
         }
     });
 
+    DOMElements.resultsCount.textContent = `${processedCount} Result${processedCount !== 1 ? 's' : ''}`;
     showToast("Generation complete! Check the output data below.", "success");
 }
 
@@ -287,15 +314,19 @@ function displayResult(name, mask, width, height) {
 
     const resultHTML = `
         <div class="col-md-6 col-lg-4">
-            <div class="card result-card">
+            <div class="result-card">
                 <div class="card-body">
-                    <h5 class="card-title text-info font-monospace">${name}.txt</h5>
-                    <p class="card-text small text-muted">Resolution: ${width}x${height}</p>
-                    <p class="card-text small text-muted">Data Size: ${fileSizeKB} KB</p>
-                    <button class="btn btn-sm btn-outline-warning download-btn font-monospace" data-url="${downloadURL}" data-name="${name}.txt">
-                        <i class="bi bi-download"></i> Download Map
-                    </button>
-                    <pre class="p-2 mt-3 rounded small overflow-auto" style="max-height: 120px;">${map.substring(0, 300)}...</pre>
+                    <div class="result-header">
+                        <h5 class="result-title">${name}.txt</h5>
+                        <button class="btn btn-sm btn-outline-modern download-btn font-mono" data-url="${downloadURL}" data-name="${name}.txt">
+                            <i class="bi bi-download me-1"></i>Download
+                        </button>
+                    </div>
+                    <div class="result-meta">
+                        <span><i class="bi bi-aspect-ratio me-1"></i>${width}x${height}</span>
+                        <span><i class="bi bi-file-text me-1"></i>${fileSizeKB} KB</span>
+                    </div>
+                    <pre>${map.substring(0, 300)}...</pre>
                 </div>
             </div>
         </div>
