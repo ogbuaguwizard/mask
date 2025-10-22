@@ -32,10 +32,11 @@ You can copy the content of this file and use in your project, or any other way 
 
 **Image vs Result**
 
-
-<img src="https://drive.google.com/uc?export=view&id=12rY3h0JKhiKkHStH-Uf4XCAsFXvUa8Z9" width="300" />
-<img src="https://drive.google.com/uc?export=view&id=12qXQvUCD7fl5c_nvsylaEqwJiSyr3EaU" width="300" />
-<img src="https://github.com/ogbuaguwizard/mask/blob/main/imgs/result.png" width="300" />
+<div align="center" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+    <img src="https://drive.google.com/uc?export=view&id=12rY3h0JKhiKkHStH-Uf4XCAsFXvUa8Z9" width="30%" />
+    <img src="https://drive.google.com/uc?export=view&id=12qXQvUCD7fl5c_nvsylaEqwJiSyr3EaU" width="30%" />
+    <img src="https://github.com/ogbuaguwizard/mask/blob/main/imgs/result.png" width="30%" />
+</div>
 
 **Practical Example**
 
