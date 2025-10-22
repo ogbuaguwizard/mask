@@ -14,6 +14,7 @@ const DOMElements = {
     conversionSettings: document.getElementById("conversionSettings"),
     resultsContainer: document.getElementById("resultsContainer"),
     resultsList: document.getElementById("resultsList"),
+    dragArea: document.getElementById("drag-area"), // New
 };
 
 let files = [];
@@ -63,41 +64,45 @@ function resetState() {
 }
 
 /**
- * Handles the file selection process.
+ * Processes the list of file objects, regardless of source (input or drag/drop).
+ * @param {FileList | Array<File>} fileList - The list of files to process.
  */
-function handleFileSelect() {
+function processFiles(fileList) {
     resetState(); // Clear previous selection
 
-    files = Array.from(DOMElements.imgFile.files);
+    // Filter to ensure only images are processed
+    files = Array.from(fileList).filter(file => file.type.startsWith('image/'));
     
     if (files.length === 0) {
-        showToast("No file selected.", "warning");
+        showToast("No valid image file selected.", "warning");
         return;
     }
 
     DOMElements.conversionSettings.style.display = 'block';
     DOMElements.generateBtn.disabled = false;
     
-    let firstImgLoaded = false;
+    let imagesLoadedCount = 0;
     
     files.forEach((file, index) => {
         const fileName = file.name.replace(/\.[^/.]+$/, "");
         
         const img = new Image();
         img.onload = function() {
+            imagesLoadedCount++;
+            
             // Update Original Resolution Info
             DOMElements.imgProp.innerHTML += `
                 <div class="d-inline-flex align-items-center me-3 mt-2">
-                    <img src="${img.src}" alt="${fileName}" width="20" class="rounded-circle me-2">
-                    <span class="small text-muted">${fileName}: ${img.naturalWidth}x${img.naturalHeight}</span>
+                    <img src="${img.src}" alt="${fileName}" width="20" class="rounded-circle me-2 border border-secondary">
+                    <span class="small text-muted font-monospace">${fileName}: ${img.naturalWidth}x${img.naturalHeight}</span>
                 </div>
             `;
             
             // Add Custom Resolution Inputs
             const setDialogHTML = `
                 <div class="d-flex align-items-center mb-2">
-                    <img src="${img.src}" alt="${fileName}" width="20" class="rounded-circle me-2">
-                    <span class="text-white-50 small me-3">${fileName}</span>
+                    <img src="${img.src}" alt="${fileName}" width="20" class="rounded-circle me-2 border border-secondary">
+                    <span class="text-white-50 small me-3 font-monospace">${fileName}</span>
                     <label class="small me-2">W:</label>
                     <input type="number" class="form-control form-control-sm setWidth me-3" data-index="${index}" value="32" style="width: 70px;">
                     <label class="small me-2">H:</label>
@@ -105,7 +110,7 @@ function handleFileSelect() {
                     ${(index === 0 && files.length > 1) ? 
                         `<div class="form-check ms-3">
                             <input class="form-check-input" type="checkbox" id="setAll">
-                            <label class="form-check-label small" for="setAll">Apply to All</label>
+                            <label class="form-check-label small text-warning" for="setAll">Apply to All</label>
                         </div>` 
                         : ''}
                 </div>
@@ -113,8 +118,8 @@ function handleFileSelect() {
             DOMElements.setDialog.innerHTML += setDialogHTML;
 
             // Only after all images are loaded, show success toast
-            if (imgs.length === files.length) {
-                showToast(`${files.length} image(s) loaded successfully.`, "success");
+            if (imagesLoadedCount === files.length) {
+                showToast(`${files.length} image(s) loaded successfully. Ready to generate.`, "success");
             }
         };
 
@@ -127,12 +132,19 @@ function handleFileSelect() {
 }
 
 /**
+ * Handles the file selection process from the input field.
+ */
+function handleFileSelect() {
+    processFiles(DOMElements.imgFile.files);
+}
+
+/**
  * Handles click events for Choose Img and Generate.
  * @param {Event} e 
  */
 function handleGlobalClick(e) {
     if (e.target === DOMElements.chooseBtn) {
-        // Clear old state and trigger file input
+        // Trigger the hidden file input
         DOMElements.imgFile.click(); 
     } else if (e.target === DOMElements.generateBtn) {
         generateMasks();
@@ -153,7 +165,7 @@ function handleResolutionChange() {
         DOMElements.originalRes.checked = true;
         DOMElements.setDialog.style.display = 'none';
         DOMElements.imgProp.style.display = 'block';
-        showToast("Please select an image first.", "warning");
+        showToast("Please select an image first to set custom resolution.", "warning");
     }
 }
 
@@ -167,18 +179,20 @@ function handleSetAll(e) {
         const checked = e.target.checked;
 
         if (setWidths.length > 0 && setHeights.length > 0) {
+            // The 'set all' checkbox is usually near the first set of inputs
+            // Let's rely on the first input's value for the master setting
             const firstWidth = setWidths[0].value;
             const firstHeight = setHeights[0].value;
 
             setWidths.forEach((el, index) => {
-                if (index > 0) { // Skip the 'set all' master input
-                    el.value = checked ? firstWidth : el.getAttribute('data-initial-value') || 32;
+                if (index > 0 || checked) { // Apply to all if checked, including the master itself
+                    el.value = firstWidth;
                     el.disabled = checked;
                 }
             });
             setHeights.forEach((el, index) => {
-                 if (index > 0) {
-                    el.value = checked ? firstHeight : el.getAttribute('data-initial-value') || 32;
+                 if (index > 0 || checked) {
+                    el.value = firstHeight;
                     el.disabled = checked;
                 }
             });
@@ -202,43 +216,45 @@ function generateMasks() {
     imgs.forEach((img, index) => {
         let width, height;
         
-        if (DOMElements.setCustomRes.checked) {
-            width = parseInt(document.querySelector(`.setWidth[data-index="${index}"]`).value);
-            height = parseInt(document.querySelector(`.setHeight[data-index="${index}"]`).value);
-            
-            if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
-                showToast(`Invalid custom resolution for ${img.name}. Skipping.`, "danger");
-                return;
+        try {
+            if (DOMElements.setCustomRes.checked) {
+                // Get the specific width/height input elements using the data-index
+                width = parseInt(document.querySelector(`.setWidth[data-index="${index}"]`).value);
+                height = parseInt(document.querySelector(`.setHeight[data-index="${index}"]`).value);
+                
+                if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+                    throw new Error("Invalid custom resolution.");
+                }
+            } else {
+                width = img.naturalWidth;
+                height = img.naturalHeight;
             }
-        } else {
-            width = img.naturalWidth;
-            height = img.naturalHeight;
+
+            // Set canvas to the required size for the current image
+            DOMElements.canvas.width = width;
+            DOMElements.canvas.height = height;
+
+            // Draw and get image data
+            context.clearRect(0, 0, width, height);
+            context.drawImage(img, 0, 0, width, height);
+            const imageData = context.getImageData(0, 0, width, height);
+            
+            const mask = generateBinaryMask(imageData.data, width, height);
+            
+            // Display result and create download option
+            displayResult(img.name, mask, width, height);
+
+        } catch (error) {
+            showToast(`Skipping ${img.name}: ${error.message || "An error occurred during processing."}`, "danger");
         }
-
-        // Set canvas to the required size for the current image
-        DOMElements.canvas.width = width;
-        DOMElements.canvas.height = height;
-
-        // Draw and get image data
-        context.clearRect(0, 0, width, height);
-        context.drawImage(img, 0, 0, width, height);
-        const imageData = context.getImageData(0, 0, width, height);
-        
-        const mask = generateBinaryMask(imageData.data, width, height);
-        
-        // Display result and create download option
-        displayResult(img.name, mask, width, height);
     });
 
-    showToast("Generation complete!", "success");
+    showToast("Generation complete! Check the output data below.", "success");
 }
 
 /**
  * Generates the binary mask array from image data.
- * @param {Uint8ClampedArray} data - The array containing [R, G, B, A] values.
- * @param {number} width 
- * @param {number} height 
- * @returns {number[][]} The 2D binary mask array.
+ * (Functionality remains the same, ensuring core logic is preserved)
  */
 function generateBinaryMask(data, width, height) {
     const mask = [];
@@ -247,7 +263,7 @@ function generateBinaryMask(data, width, height) {
         for (let j = 0; j < width; j++) {
             // Alpha channel is at index ( (j + i * width) * 4 ) + 3
             const alphaIndex = (j + i * width) * 4 + 3;
-            // The mask is 1 (visible) if alpha is not 0, and 0 (transparent) if alpha is 0.
+            // The mask is 1 (visible/opaque) if alpha is not 0, and 0 (transparent) if alpha is 0.
             mask[i][j] = (data[alphaIndex] !== 0) ? 1 : 0;
         }
     }
@@ -255,45 +271,44 @@ function generateBinaryMask(data, width, height) {
 }
 
 /**
- * Creates the formatted text for the mask and triggers download.
- * @param {string} name - The original file name.
- * @param {number[][]} mask - The generated binary mask array.
- * @param {number} width - The width of the mask.
- * @param {number} height - The height of the mask.
+ * Creates the formatted text for the mask and sets up the download option.
  */
 function displayResult(name, mask, width, height) {
     // Stringify and format the 2D array for readability in the text file
     let map = JSON.stringify(mask);
     // Add newlines after each inner array for better text file formatting
     map = map.replace(/\],/g, '],\n'); 
+    map = map.replace(/\[\[/g, '[\n['); // Newline after the opening outer bracket
 
     // Create a Blob for the file
     const fileBlob = new Blob([map], {type: "text/plain"});
     const downloadURL = URL.createObjectURL(fileBlob);
+    const fileSizeKB = (fileBlob.size / 1024).toFixed(2);
 
     const resultHTML = `
         <div class="col-md-6 col-lg-4">
-            <div class="card bg-dark result-card">
+            <div class="card result-card">
                 <div class="card-body">
-                    <h5 class="card-title text-info">${name}.txt</h5>
+                    <h5 class="card-title text-info font-monospace">${name}.txt</h5>
                     <p class="card-text small text-muted">Resolution: ${width}x${height}</p>
-                    <p class="card-text small text-muted">File Size: ${(fileBlob.size / 1024).toFixed(2)} KB</p>
-                    <button class="btn btn-sm btn-outline-info download-btn" data-url="${downloadURL}" data-name="${name}.txt">
-                        <i class="bi bi-download"></i> Download
+                    <p class="card-text small text-muted">Data Size: ${fileSizeKB} KB</p>
+                    <button class="btn btn-sm btn-outline-warning download-btn font-monospace" data-url="${downloadURL}" data-name="${name}.txt">
+                        <i class="bi bi-download"></i> Download Map
                     </button>
-                    <pre class="bg-black text-success p-2 mt-2 rounded small overflow-auto" style="max-height: 100px;">${map.substring(0, 200)}...</pre>
+                    <pre class="p-2 mt-3 rounded small overflow-auto" style="max-height: 120px;">${map.substring(0, 300)}...</pre>
                 </div>
             </div>
         </div>
     `;
     DOMElements.resultsList.insertAdjacentHTML('beforeend', resultHTML);
     
-    // Clean up the URL when the download link is clicked and the element is removed
+    // Attach download event listener to the newly created button
     const lastResultCard = DOMElements.resultsList.lastElementChild;
     const downloadButton = lastResultCard.querySelector('.download-btn');
     downloadButton.addEventListener('click', (e) => {
-        const url = e.target.closest('.download-btn').getAttribute('data-url');
-        const fileName = e.target.closest('.download-btn').getAttribute('data-name');
+        const btn = e.target.closest('.download-btn');
+        const url = btn.getAttribute('data-url');
+        const fileName = btn.getAttribute('data-name');
         
         const a = document.createElement("a");
         a.href = url;
@@ -302,8 +317,40 @@ function displayResult(name, mask, width, height) {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url); // Clean up the Blob URL immediately
-        showToast(`${fileName} downloaded successfully!`, "success");
+        showToast(`'${fileName}' downloaded successfully!`, "success");
+        // Remove the result card after download (optional, but good for cleanup)
+        btn.closest('.col-md-6').remove();
     });
+}
+
+/**
+ * Initializes Drag and Drop handlers.
+ */
+function setupDragAndDrop() {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        DOMElements.dragArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        DOMElements.dragArea.addEventListener(eventName, () => DOMElements.dragArea.classList.add('drag-over'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        DOMElements.dragArea.addEventListener(eventName, () => DOMElements.dragArea.classList.remove('drag-over'), false);
+    });
+
+    DOMElements.dragArea.addEventListener('drop', handleDrop, false);
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const droppedFiles = dt.files;
+        processFiles(droppedFiles);
+    }
 }
 
 /**
@@ -318,7 +365,11 @@ function initApp() {
     DOMElements.imgFile.addEventListener('change', handleFileSelect);
     document.addEventListener("click", handleGlobalClick);
     document.getElementById("conversionSettings").addEventListener('change', handleResolutionChange);
-    document.getElementById("setDialog").addEventListener('change', handleSetAll);
+    // Use event delegation for the 'setAll' checkbox since it's dynamically added
+    DOMElements.setDialog.addEventListener('change', handleSetAll);
+
+    // Setup drag and drop functionality
+    setupDragAndDrop();
 
     // Initial check for resolution settings
     handleResolutionChange();
