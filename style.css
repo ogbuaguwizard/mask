@@ -1,29 +1,83 @@
 /* style.css */
+:root {
+    --primary-color: #00bcd4; /* Cyan/Teal for a tech feel */
+    --secondary-bg: #1c1f23; /* Darker than default dark for card backgrounds */
+    --accent-warning: #ffc107; /* Bright yellow for warnings/accents */
+    --font-primary: 'Montserrat', sans-serif;
+    --font-monospace: 'Fira Code', monospace;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-primary);
+    background-color: #0d1117 !important; /* GitHub-like dark background */
+}
+
+/* Override Bootstrap variables for a custom dark theme */
+.text-primary { color: var(--primary-color) !important; }
+.btn-primary { 
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #0d1117; /* Dark text on bright button */
+}
+.btn-primary:hover {
+    background-color: #00a0b2;
+    border-color: #00a0b2;
+}
+.text-warning { color: var(--accent-warning) !important; }
+.border-primary { border-color: var(--primary-color) !important; }
+.bg-secondary {
+    background-color: var(--secondary-bg) !important;
+}
+.bg-dark-subtle {
+    background-color: #212529 !important;
+}
+.text-info { color: #00c0ff !important; } /* A bright blue for info */
+
+.font-monospace {
+    font-family: var(--font-monospace) !important;
+    font-weight: 600;
 }
 
 #main-container {
-    max-width: 900px; /* Limit container width for better readability */
+    max-width: 900px;
 }
 
-/* Custom styles for the dark theme */
-.bg-secondary {
-    background-color: #343a40 !important; /* Darker secondary background */
+/* Drag and Drop Area */
+#drag-area {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+#drag-area.drag-over {
+    background-color: var(--secondary-bg);
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 15px var(--primary-color);
+}
+.border-dashed {
+    border-style: dashed !important;
 }
 
-.btn-primary, .btn-success {
-    transition: all 0.2s ease-in-out;
-}
-
+/* Results Section Styling */
 .result-card {
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: #212529 !important; /* Slightly lighter card bg */
+    border: 1px solid #343a40;
 }
 
 .result-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4); /* Primary color shadow */
 }
 
-.form-check-label {
-    cursor: pointer;
+.result-card pre {
+    background-color: #111; /* Terminal-like code background */
+    color: #4CAF50; /* Green text for data/success */
+    border: 1px solid #333;
+    font-family: var(--font-monospace);
+}
+
+.form-control-sm {
+    font-family: var(--font-monospace);
+    background-color: #343a40;
+    border-color: #495057;
+    color: #fff;
 }
