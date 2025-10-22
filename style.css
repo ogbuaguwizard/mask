@@ -1,0 +1,29 @@
+/* style.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#main-container {
+    max-width: 900px; /* Limit container width for better readability */
+}
+
+/* Custom styles for the dark theme */
+.bg-secondary {
+    background-color: #343a40 !important; /* Darker secondary background */
+}
+
+.btn-primary, .btn-success {
+    transition: all 0.2s ease-in-out;
+}
+
+.result-card {
+    transition: transform 0.2s;
+}
+
+.result-card:hover {
+    transform: translateY(-5px);
+}
+
+.form-check-label {
+    cursor: pointer;
+}
